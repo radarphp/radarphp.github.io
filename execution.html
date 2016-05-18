@@ -1,0 +1,121 @@
+<html>
+<head>
+    <title>Execution Process</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/container.html">Container Configuration</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    7. Execution Process                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="7">7. Execution Process</h1>
+<p>The full execution process in Radar looks like this:</p>
+<pre><code>Boot -&gt; Setup -&gt; Run -&gt; Middleware
+</code></pre>
+<p>Point by point:</p>
+<ul>
+<li>
+<p>A bootstrap phase to build a DI container with custom configuration;</p>
+</li>
+<li>
+<p>The setup phase (this is where you define the URL routes with their action
+elements, add middleware callables, define custom Action/Routing/Exception/
+Sending handlers), etc.</p>
+</li>
+<li>
+<p>The run phase, which executes all middleware callables in turn.</p>
+</li>
+</ul>
+<p>The initial <code>web/index.php</code> installation queues four middleware decorators:</p>
+<ul>
+<li>
+<p><em>Relay\Middleware\SendingHandler</em> to pass along the inbound request without
+modification, and send back the outbound response after all other middlware
+have processed it;</p>
+</li>
+<li>
+<p><em>Relay\Middleware\ExceptionHandler</em> as a final fallback to catch exceptions;</p>
+</li>
+<li>
+<p><em>Radar\Adr\Handler\RoutingHandler</em> to determine the <em>Route</em> based on the <em>ServerRequest</em>;</p>
+</li>
+<li>
+<p><em>Radar\Adr\Handler\ActionHandler</em> to use the <em>Route</em> for the action-domain-responder activity:</p>
+<ul>
+<li>
+<p>An <em>Input</em> callable is invoked to examine the incoming HTTP
+<em>ServerRequest</em> message and extract values to pass along to the core
+<em>Domain</em> callable.</p>
+</li>
+<li>
+<p>A <em>Domain</em> callable is invoked using those values, and a <em>Payload</em>
+from the <em>Domain</em> is received in return.</p>
+</li>
+<li>
+<p>A <em>Responder</em> callable is invoked with the <em>Domain</em> output; the
+<em>Responder</em> then builds the outgoing HTTP <em>Response</em> message.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>You can prepend, append, or replace these handlers in <code>web/index.php</code> with your own middleware.</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/container.html">6. Container Configuration</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                    </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>

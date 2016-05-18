@@ -1,0 +1,143 @@
+<html>
+<head>
+    <title>Container Configuration</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/environment.html">Environment Variables</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    6. Container Configuration                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                                <label for="">Next</label>
+                <a href="/execution.html">Execution Process</a>            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="6">6. Container Configuration</h1>
+<h2 id="6-1">6.1. Aura.Di</h2>
+<p>The Radar dependency injection container is an instance of
+<a href="https://github.com/auraphp/Aura.Di">Aura.Di</a>. The Radar boot process
+runs a list of container configuration classes when building the container.
+You can learn about container configuration classes
+<a href="https://github.com/auraphp/Aura.Di/blob/3.x/docs/index.md#container-builder-and-config-classes">here</a>.</p>
+<h2 id="6-2">6.2. Configuration (aka "Providers")</h2>
+<p>To tell the boot process which container configuration (aka "provider") classes
+to load, and in which order, pass an array of config class names to the <code>Boot()</code>
+call in <code>web/index.php</code>. This array will automatically be merged with the default Config that comes with ADR.</p>
+<pre><code class="language-php">$boot = new Boot();
+$adr = $boot-&gt;adr([
+    'Foo\Bar\ContainerConfig',
+    'Baz\Dib\_Config',
+    'Some\Other\ConfigClass'
+]);
+</code></pre>
+<p>These will be loaded by the container builder in order.</p>
+<p>Of special importance, if your <em>Domain</em> is in a separate package and has its
+own configuration class, be sure to include that class name in the list.</p>
+<h2 id="6-3">6.3. Extracting Setup To Configuration</h2>
+<p>If you like, you can greatly reduce the size of your <code>web/index.php</code> file by
+moving all the middleware and route setup logic to a configuration class,
+and then specifying that class as part of the container configuration. For
+example, if your <code>web/index.php</code> has this setup logic ...</p>
+<pre><code class="language-php">$adr-&gt;middle('Radar\Adr\Handler\ExceptionHandler');
+$adr-&gt;middle('My\Middleware\BarHandler');
+$adr-&gt;middle('Radar\Adr\Handler\RoutingHandler');
+
+...
+
+$adr-&gt;get(...);
+$adr-&gt;post(...);
+$adr-&gt;delete(...);
+</code></pre>
+<p>... you can extract that to a DI configuration class like so. The follwing
+<em>My\Config</em> class might be saved in <code>src/My/Config.php</code>; note the use of
+<code>$di-&gt;get()</code> to retrieve the <code>$adr</code> service.</p>
+<pre><code class="language-php">namespace My;
+
+use Aura\Di\Container;
+use Aura\Di\ContainerConfig;
+
+class Config extends ContainerConfig
+{
+    public function modify(Container $di)
+    {
+        $adr = $di-&gt;get('radar/adr:adr');
+
+        $adr-&gt;middle('Radar\Adr\Handler\ExceptionHandler');
+        $adr-&gt;middle('My\Middleware\FooHandler');
+        $adr-&gt;middle('My\Middleware\BarHandler');
+        $adr-&gt;middle('Radar\Adr\Handler\RoutingHandler');
+        $adr-&gt;middle('Radar\Adr\Handler\ActionHandler');
+        $adr-&gt;middle('Radar\Adr\Handler\SendingHandler');
+
+        $adr-&gt;get(...);
+        $adr-&gt;post(...);
+        $adr-&gt;delete(...);
+    }
+}
+</code></pre>
+<p>Then you can replace the setup logic from <code>web/index.php</code> by specifying a
+Config file in the <code>Boot()</code> params:</p>
+<pre><code class="language-php">$boot = new Boot();
+$adr = $boot-&gt;adr([
+    'Foo\Bar\ContainerConfig',
+    'My\Config',
+]);
+</code></pre>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/environment.html">5. Environment Variables</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                        <label for="">Next</label>
+                    <a href="/execution.html">7. Execution Process</a>                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>

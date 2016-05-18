@@ -1,0 +1,124 @@
+<html>
+<head>
+    <title>Middleware</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/routing.html">Routing</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    4. Middleware                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                                <label for="">Next</label>
+                <a href="/environment.html">Environment Variables</a>            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="4">4. Middleware</h1>
+<p>Radar uses the <a href="http://relayphp.com">Relay</a> system for dispatching middleware.
+You can read more about middleware there.</p>
+<p>To add Relay-compatible middleware entries to the queue, call the
+<code>$adr-&gt;middle()</code> method in <code>web/index.php</code>. Pass a class name as the only
+parameter to the method. The underlying dependency injection container will
+create an instance of that class so that Relay can call its <code>__invoke()</code> method.</p>
+<pre><code class="language-php">$adr-&gt;middle('My\Middleware\ClassName');
+</code></pre>
+<p>Alternatively, pass:</p>
+<ul>
+<li>
+<p>An array of the form <code>['ClassName', 'method']</code>. In this
+case, the underlying dependency injection container will create an instance of
+that class and call the specified method. The method should be Relay-compatible.</p>
+</li>
+<li>
+<p>A new callable object with a Relay-compatible <code>__invoke()</code> method.</p>
+</li>
+<li>
+<p>An anonymous function with a Relay-compatible signature.</p>
+</li>
+</ul>
+<h2 id="4-1">4.1. Exception Handling</h2>
+<p>If middleware in the queue fails to catch an exception, the default
+<em>Relay\Middleware\ExceptionHandler</em> will catch it automatically. The
+<em>ExceptionHandler</em> will:</p>
+<ul>
+<li>write the <em>Exception</em> message to a new <em>Response</em> object,</li>
+<li>set a <code>500</code> HTTP status code on that new <em>Response</em>,</li>
+<li>return the new <em>Response</em> to the previous middleware handler.</li>
+</ul>
+<p>The <em>ExceptionHandler</em> should be placed after the <em>ResponseSender</em> middleware in
+the queue, so that the <em>ResponseSender</em> can then send the exceptional response.</p>
+<h2 id="4-2">4.2. Middleware And Domain Activity</h2>
+<p>You are going to be very tempted to place domain-related activity in your
+middleware, things like "checking to see if a user is authenticated" and so on.
+Resist this temptation. Middleware should only be about inspecting and modifying
+the request and response, <em>not</em> about handling domain elements. Middleware is
+not part of your core application; it is part of the HTTP user interface to that
+application.</p>
+<p>One shorthand way of determining if you are doing domain work is this: if you
+have to touch a storage system of any sort, it's probably domain related. This
+includes things like starting a session, which uses some form of storage system
+to re-establish itself.</p>
+<p>This may seem onerous, but remember: <strong>Radar is an HTTP-specific user interface
+wrapper</strong> around your core application. Anything that relates to authentication,
+authorization, database, disk, and so on are more properly part of your domain
+work, <em>not</em> the user- interface work related to the input and output related to
+that domain. All the data you need to work with the domain should come from the
+incoming request, and all the data you need to build a response should emit from
+the domain as a <em>Payload</em>.</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/routing.html">3. Routing</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                        <label for="">Next</label>
+                    <a href="/environment.html">5. Environment Variables</a>                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>

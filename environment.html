@@ -1,0 +1,79 @@
+<html>
+<head>
+    <title>Environment Variables</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/middleware.html">Middleware</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    5. Environment Variables                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                                <label for="">Next</label>
+                <a href="/container.html">Container Configuration</a>            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="5">5. Environment Variables</h1>
+<p>You can place environment-specific values in the <code>.env</code> file at the Radar
+project root. Radar will use this file at boot time to populate the <code>$_ENV</code>
+superglobal. You can also use <code>getenv()</code> to get the same values.</p>
+<p>The <code>web/index.php</code> file uses the <a href="https://github.com/josegonzalez/php-dotenv">josegonzalez/dotenv</a> library for the environment loading. You can control the loader behavior by setting options through the <code>Loader::load()</code> call in <code>web/index.php</code>. Please consult the <a href="https://github.com/josegonzalez/php-dotenv#static-environment-definition">php-dotenv documentation</a> for more information.</p>
+<p>Alternatively, if you have another loader you prefer to use, or none at all,
+modify <code>web/index.php</code> and <code>composer.json</code> as you see fit.</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/middleware.html">4. Middleware</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                        <label for="">Next</label>
+                    <a href="/container.html">6. Container Configuration</a>                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>

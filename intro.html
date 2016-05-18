@@ -1,0 +1,189 @@
+<html>
+<head>
+    <title>Introduction</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/">Radar for PHP</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    1. Introduction                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                                <label for="">Next</label>
+                <a href="/domain.html">Domain Design</a>            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="1">1. Introduction</h1>
+<h2 id="1-1">1.1. What is Action-Domain-Responder?</h2>
+<p>You are probably used to separating concerns in terms of Model-View-Controller
+(MVC).  <a href="http://pmjones.io/adr">Action-Domain-Responder</a> (ADR) represents a
+refinement of MVC, and should not be difficult to understand if you are already
+familiar with MVC.</p>
+<p>With ADR, concerns are separated like this:</p>
+<ul>
+<li>
+<p>the Domain is the logic to manipulate the domain, session, application, and
+environment data, modifying state and persistence as needed. This is the real
+core of the application, where all the interesting work happens; think in terms
+of "Domain Model" or "Domain Driven Design" here.</p>
+</li>
+<li>
+<p>the Responder is the logic to build an HTTP response. It deals with body
+content, templates and views, headers and cookies, status codes, and so on.
+Think in terms of "Presentation" or "View" here, where the View represents the
+entirety of the HTTP response, including both the headers and the body.</p>
+</li>
+<li>
+<p>the Action is the logic that connects the Domain and Responder. It passes the
+user input to the Domain, and passes the Domain output to the Responder. It
+would be tempting to think in terms of "Controller" here, but the Action is
+intentionally very simple, even trivial. It should contain no logic aside from
+connecting the Domain and Responder.</p>
+</li>
+</ul>
+<h2 id="1-2">1.2. How Does Radar Work?</h2>
+<p>Radar is superficially similar to a micro-framework. It has a routing system to
+point URLs to actions, a wrapper- or chain-style middleware system to modify the
+incoming HTTP request and outgoing HTTP response, and a dependency injection
+container and configuration system to wire everything together.</p>
+<p>However, with Radar, you don't specify "controllers" or "closures" for your
+routes. Instead, you specify up to three callables per route, all of which are
+optional:</p>
+<ol>
+<li>
+<p>A <em>Domain</em> callable to be invoked with the user input. (If you don't specify
+a Domain callable, the <em>Responder</em> will be invoked directly; this is unusual but
+sometimes convenient.)</p>
+</li>
+<li>
+<p>An <em>Input</em> callable to extract user input from the incoming HTTP
+<em>ServerRequest</em>. The default Radar <em>Input</em> callable will naively merge the
+route path attributes (path-info parameters), the query parameters (<code>$_GET</code>),
+the parsed body parameters (<code>$_POST</code>), and the uploaded files array (<code>$_FILES</code>)
+into a single associative array of user input.</p>
+</li>
+<li>
+<p>A <em>Responder</em> callable to convert the <em>Domain</em> output to an HTTP response.
+The default Radar <em>Responder</em> expects a
+<a href="https://github.com/auraphp/Aura.Payload"><em>Payload</em></a> object from the <em>Domain</em>;
+it delivers JSON output and sets proper HTTP status codes for a wide range of
+scenarios.</p>
+</li>
+</ol>
+<p>These three callables are invoked within a standardized <em>ActionHandler</em>. As a
+result, the Action logic in Radar is always the same for every route. The only
+variations are in how input is collected, how output is presented, and of course
+in how your core application domain operates.</p>
+<p>So, don't think of Radar as a micro-framework. Think of it more like a wrapper
+around the core of your real application domain. Its only purpose is to guide
+input from the user into the domain, and to present output from the domain back
+to the user.</p>
+<h2 id="1-3">1.3. Installing Radar</h2>
+<p>You will need <a href="https://getcomposer.org">Composer</a> to install Radar.</p>
+<p>Pick a project name, and use Composer to create it with Radar; here we create
+one called <code>example-project</code>:</p>
+<pre><code>composer create-project -s dev radar/project example-project
+</code></pre>
+<p>Confirm the installation by changing into the project directory and starting the
+built-in PHP web server:</p>
+<pre><code>cd example-project
+php -S localhost:8080 -t web/
+</code></pre>
+<p>You can then browse to <a href="http://localhost:8080/">http://localhost:8080/</a> and see JSON output:</p>
+<pre><code>{"phrase":"Hello world"}
+</code></pre>
+<p>You can also browse to <a href="http://localhost:8080/your-name">http://localhost:8080/your-name</a> and see modified JSON output:</p>
+<pre><code>{"phrase":"Hello your-name"}
+</code></pre>
+<h2 id="1-4">1.4. Project Structure</h2>
+<p>A Radar project looks like this:</p>
+<pre><code>project/            # The Radar project directory
+├── .env            # Environment variable definitions
+├── composer.json   # Project composer file
+├── src/            # Project class files
+│   ├── ...
+│   ├── ...
+│   └── ...
+├── vendor/         # Composer-loaded packages
+│   ├── ...
+│   ├── ...
+│   └── ...
+└── web/            # Web document root
+    └── index.php   # Bootstrap script
+</code></pre>
+<p>Of note, the <code>web/index.php</code> file is where you will:</p>
+<ul>
+<li>Boostrap the Radar <code>$adr</code> instance</li>
+<li>Define routes</li>
+<li>Define the middleware queue</li>
+</ul>
+<h2 id="1-5">1.5. Setting A Project Namespace</h2>
+<p>In a Radar project, by default, Composer autoloads any unknown PSR-4 namespace
+name from the <code>src/</code> directory. This means that you can create any PSR-4 style
+class structure in the <code>src/</code> directory for your Radar project.</p>
+<p>If you want to define a specific namespace for your project, modify
+<code>composer.json</code> so that namespace points to the <code>src/</code> directory ...</p>
+<pre><code>"autoload": {
+    "psr-4": {
+        "ProjectName\\": "src/"
+    }
+},
+</code></pre>
+<p>... then regenerate the Composer autoloader by calling <code>composer dump-autoload</code>.</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                        <label for="">Next</label>
+                    <a href="/domain.html">2. Domain Design</a>                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>

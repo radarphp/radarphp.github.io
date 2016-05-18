@@ -92,7 +92,7 @@ header .current small.parent {
 
 section#content {
     margin: 24px 0px;
-    font-size: 17px;
+    font-size: 18px;
 }
 
 #content code {
@@ -102,13 +102,14 @@ section#content {
     margin: 0px 3px;
     background: #444;
     color: white;
+    font-size: 14px;
 }
 
 #content pre code {
     border: none;
     background: none;
     color: 444;
-    font-size: 17px;
+    font-size: 14px;
 }
 
 #content h1,
@@ -120,7 +121,17 @@ section#content {
     color: #337ab7;
 }
 
+#content dd {
+    margin-left: 18px;
+}
 
+#content dl dt {
+    margin-top: 18px;
+}
+
+#content dd dl dt {
+    margin-top: 0px;
+}
 
 /* Footer Section */
 

@@ -18,7 +18,7 @@ $next = $this->page->getNext();
                 <h3 class="title">
                     <?php echo $this->page->getNumberAndTitle(); ?>
                 </h3>
-                <small class="parent">My Book</small>
+                <small class="parent"><?php echo $this->page->getRoot()->getTitle(); ?></small>
             </div>
             <div class="next col-md-3">
                 <?php if ($next) { ?>
@@ -36,5 +36,5 @@ $next = $this->page->getNext();
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                
-            
+
+

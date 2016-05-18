@@ -1,7 +1,13 @@
 {
-    "title": "My Book",
+    "title": "Radar for PHP",
     "content": [
-        "example.md"
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/intro.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/domain.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/routing.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/middleware.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/environment.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/container.md",
+        "https://raw.githubusercontent.com/radarphp/Radar.Project/1.x/docs/execution.md"
     ],
     "target": "../../",
     "template": "../templates/main.php"

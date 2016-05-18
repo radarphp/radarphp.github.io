@@ -1,0 +1,223 @@
+<html>
+<head>
+    <title>Domain Design</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="row">
+            <div class="prev col-md-3">
+                                <label for="">Prev</label>
+                <a href="/intro.html">Introduction</a>            </div>
+            <div class="current col-md-6">
+                <h3 class="title">
+                    2. Domain Design                </h3>
+                <small class="parent">Radar for PHP</small>
+            </div>
+            <div class="next col-md-3">
+                                <label for="">Next</label>
+                <a href="/routing.html">Routing</a>            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</header>
+
+<section id="content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+
+
+<h1 id="2">2. Domain Design</h1>
+<p>Radar concentrates exclusively the HTTP request/response cycle. This means that,
+for Radar to be useful, you need to build your <em>Domain</em> outside of, and probably
+in parallel with, your Radar wrapper around that <em>Domain</em>.</p>
+<p>With that in mind, this is a minimalist primer on building a <em>Domain</em> service.
+For more information, please consult Domain Driven Design and similar works.</p>
+<h2 id="2-1">2.1. Application Service</h2>
+<p>All Radar cares about is the outermost (or topmost) entry point into the
+<em>Domain</em> layer. This entry point is likely to be something like an
+<em>ApplicationService</em>.</p>
+<p>Your ADR <em>Action</em> will pass user input into the <em>ApplicationService</em>. The
+<em>ApplicationService</em> will initiate and coordinate all the underlying activity in
+the <em>Domain</em>, and return a <em>Payload</em> back to the <em>Action</em> for the <em>Responder</em> to
+use.</p>
+<p>The <em>ApplicationService</em> should never access anything directly in the HTTP or
+CLI layer. Everything it needs should be injected from the outside, either at
+construction time or through a method call. For example, no superglobal should
+ever appear in an <em>ApplicationService</em> (or anywhere else in the <em>Domain</em>
+either). This is to make sure the <em>ApplicationService</em>, and by extension the
+<em>Domain</em> as a whole, is independent from any particular user interface system.</p>
+<p>Each <em>ApplicationService</em> should be as narrowly-purposed as possible, handling
+either a single activity, or a limited set of related activities.</p>
+<h2 id="2-2">2.2. Class Structure</h2>
+<p>In a todo system, for example, there might be a single <em>TodoApplicationService</em>
+with methods for browse, read, edit, add, and delete:</p>
+<pre><code class="language-php">namespace Domain\Todo;
+
+class TodoApplicationService
+{
+    // fetch a list of todo items
+    public function getList(array $input) { ... }
+
+    // edit a todo item
+    public function editItem(array $input) { ... }
+
+    // mark a todo item as done or not
+    public function markItem(array $input) { ... }
+
+    // add a new todo item
+    public function addItem(array $input) { ... }
+
+    // delete a todo item
+    public function deleteItem(array $input) { ... }
+}
+</code></pre>
+<p>Alternatively, and perhaps preferably, there might be a series of single-purpose
+<em>Todo</em> application services:</p>
+<pre><code class="language-php">namespace Domain\Todo\ApplicationService;
+
+class GetList
+{
+    public function __invoke(array $input) { ... }
+}
+
+class EditItem
+{
+    public function __invoke(array $input) { ... }
+}
+
+class AddItem
+{
+    public function __invoke(array $input) { ... }
+}
+
+class DeleteItem
+{
+    public function __invoke(array $input) { ... }
+}
+</code></pre>
+<h3 id="2-2-1">2.2.1. Domain Logic</h3>
+<p>The logic inside the <em>ApplicationService</em> is entirely up to you. You can use
+anything from a plain-old database connection to a formal DDD approach. As long
+as the <em>ApplicationService</em> returns a <em>Payload</em>, the internals of the
+<em>ApplicationService</em> and its interactions do not matter to Radar.</p>
+<p>Here is a naive bit of logic for a <em>Fetch</em> service in our todo application. It
+guards against several error conditions (anonymous user, invalid input, user
+attempting to edit a todo item they do not own, and database update failures).
+It returns a <em>Payload</em> that describes exactly what happened inside the
+<em>Domain</em>. Also notice how it is completely independent from HTTP or CLI
+elements; this makes it easier to test in isolation, and to reuse in different
+interfaces.</p>
+<pre><code class="language-php">namespace Domain\Todo\ApplicationService;
+
+use Aura\Payload\Payload;
+use Aura\Payload_Interface\PayloadStatus;
+use Exception;
+use Todo\User;
+use Todo\Mapper;
+
+class EditItem
+{
+    public function __construct(
+        User $user,
+        Mapper $mapper,
+        Payload $payload
+    ) {
+        $this-&gt;user = $user;
+        $this-&gt;mapper = $mapper;
+        $this-&gt;payload = $payload;
+    }
+
+    public function __invoke(array $input)
+    {
+        if (! $this-&gt;user-&gt;isAuthenticated()) {
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::NOT_AUTHENTICATED);
+        }
+
+        if (empty($input['id'])) {
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::NOT_VALID)
+                -&gt;setInput($input)
+                -&gt;setMessages([
+                    'id' =&gt; 'Todo ID not set.'
+                ]);
+        }
+
+        $todo = $this-&gt;mapper-&gt;fetchById($input['id']);
+        if (! $todo) {
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::NOT_FOUND)
+                -&gt;setInput($input);
+        }
+
+        if ($this-&gt;user-&gt;userId !== $todo-&gt;userId) {
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::NOT_AUTHORIZED)
+                -&gt;setInput($input);
+        }
+
+        try {
+            $todo-&gt;description = $input['description'];
+            $this-&gt;mapper-&gt;update($todo);
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::UPDATED)
+                -&gt;setOutput($todo);
+        } catch (Exception $e) {
+            return $this-&gt;payload
+                -&gt;setStatus(PayloadStatus::ERROR)
+                -&gt;setInput($input)
+                -&gt;setOutput($e);
+        }
+    }
+}
+</code></pre>
+<h3 id="2-2-2">2.2.2. Domain Packaging</h3>
+<p>Although you can place the <em>Domain</em> layer in the Radar <code>src/</code> directory, it may
+be wiser to create it as a separate package, and import it via Composer. This
+will help to enforce the separation between the core application and the Radar
+user-interface wrapper around it, along with test suites independent from the
+Radar project.</p>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <section id="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-md-3">
+                                        <label for="">Prev</label>
+                    <a href="/intro.html">1. Introduction</a>                </div>
+                <div class="parent col-md-6">
+                                        <label for="">Up</label>
+                    <a href="/">Radar for PHP</a>                </div>
+                <div class="next col-md-3">
+                                        <label for="">Next</label>
+                    <a href="/routing.html">3. Routing</a>                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </section>
+    <section id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    
+                    <span>
+                        Powered by <a href="">Bookdown.io</a> | Designed by <a href="">yuripertamax</a>
+                    </span>    
+     
+                </div>
+            </div>
+        </div>
+    </section>
+</footer>
+</body>
+</html>
